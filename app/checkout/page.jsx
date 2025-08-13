@@ -10,6 +10,7 @@ import { useCurrency } from '../../contexts/CurrencyContext'
 import { orderAPI } from '../../lib/api'
 import stripePromise from '../../lib/stripe'
 import toast from 'react-hot-toast'
+import ProtectedRoute from '../components/ProtectedRoute'
 import MiniHeader from '../components/MiniHeader'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
@@ -143,6 +144,7 @@ export default function Checkout() {
   }
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-gray-50">
       <MiniHeader />
       <Header />
@@ -621,5 +623,6 @@ export default function Checkout() {
 
       <Footer />
     </div>
+    </ProtectedRoute>
   )
 }

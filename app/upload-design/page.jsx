@@ -6,6 +6,7 @@ import { ArrowLeft, Upload, Image, FileText, DollarSign, Tag, AlertCircle, Check
 import { designAPI, categoryAPI } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
+import ProtectedRoute from '../components/ProtectedRoute'
 import MiniHeader from '../components/MiniHeader'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
@@ -192,6 +193,7 @@ export default function UploadDesign() {
   }
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-gray-50">
       <MiniHeader />
       <Header />
@@ -649,5 +651,6 @@ export default function UploadDesign() {
 
       <Footer />
     </div>
+    </ProtectedRoute>
   )
 }

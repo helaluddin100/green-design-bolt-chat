@@ -1,9 +1,11 @@
 'use client'
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, CheckCircle, XCircle, RefreshCw, Leaf, Hash } from 'lucide-react'
 import { authAPI } from '../../lib/api'
+import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
 import MiniHeader from '../components/MiniHeader'
 import Header from '../components/Header'
@@ -15,6 +17,8 @@ function VerifyEmailContent() {
   const [verificationCode, setVerificationCode] = useState('')
   const [showCodeInput, setShowCodeInput] = useState(false)
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const { setNeedsVerification } = useAuth()
   const email = searchParams.get('email')
 
   useEffect(() => {
@@ -29,12 +33,25 @@ function VerifyEmailContent() {
 
   const verifyWithCode = async (code) => {
     try {
-      await authAPI.verifyEmail({ code })
+      const response = await authAPI.verifyEmail({ code, email })
+      const { user, token } = response.data.data
+      
+      // Set user as authenticated after verification
+      localStorage.setItem('auth_token', token)
+      localStorage.setItem('user', JSON.stringify(user))
+      setNeedsVerification(false)
+      
       setVerificationStatus('success')
       toast.success('Email verified successfully!')
+      
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 2000)
     } catch (error) {
       setVerificationStatus('failed')
-      toast.error('Verification failed')
+      const message = error.response?.data?.message || 'Verification failed'
+      toast.error(message)
     }
   }
 

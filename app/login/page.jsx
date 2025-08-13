@@ -30,7 +30,12 @@ export default function Login() {
     })
     
     if (result.success) {
-      router.push('/dashboard')
+      // Check if user needs email verification
+      if (result.needsVerification) {
+        router.push(`/verify-email?email=${encodeURIComponent(formData.emailOrUsername)}`)
+      } else {
+        router.push('/dashboard')
+      }
     }
     
     setLoading(false)

@@ -51,17 +51,25 @@ class AuthController extends Controller
             // Generate and send verification code
             $verificationCode = $user->generateEmailVerificationCode();
             
-            // TODO: Send email with verification code
-            // Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
-
-            $token = $user->createToken('auth_token')->plainTextToken;
+            // Send email with verification code
+            try {
+                Mail::raw(
+                    "Your GreenBuild verification code is: {$verificationCode}\n\nThis code will expire in 15 minutes.",
+                    function ($message) use ($user) {
+                        $message->to($user->email)
+                               ->subject('GreenBuild - Email Verification Code');
+                    }
+                );
+            } catch (\Exception $e) {
+                // Log email error but don't fail registration
+                \Log::error('Failed to send verification email: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'User registered successfully. Please check your email for verification code.',
+                'message' => 'Registration successful! Please check your email for verification code.',
                 'data' => [
                     'user' => $user,
-                    'token' => $token,
                     'verification_required' => true,
                 ],
             ], 201);
@@ -99,6 +107,16 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'Invalid credentials',
             ], 401);
+        }
+
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Please verify your email address',
+                'data' => [
+                    'verification_required' => true,
+                ],
+            ]);
         }
 
         if ($user->status !== 'active') {
@@ -233,8 +251,21 @@ class AuthController extends Controller
 
         $verificationCode = $user->generateEmailVerificationCode();
         
-        // TODO: Send email with verification code
-        // Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
+        // Send email with verification code
+        try {
+            Mail::raw(
+                "Your GreenBuild verification code is: {$verificationCode}\n\nThis code will expire in 15 minutes.",
+                function ($message) use ($user) {
+                    $message->to($user->email)
+                           ->subject('GreenBuild - Email Verification Code');
+                }
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send verification email',
+            ], 500);
+        }
 
         return response()->json([
             'success' => true,
@@ -246,6 +277,7 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'code' => 'required|string|size:6',
+            'email' => 'required|email|exists:users,email',
         ]);
 
         if ($validator->fails()) {
@@ -256,7 +288,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $user = $request->user();
+        $user = User::where('email', $request->email)->first();
         
         if ($user->hasVerifiedEmail()) {
             return response()->json([
@@ -266,9 +298,15 @@ class AuthController extends Controller
         }
 
         if ($user->verifyEmailWithCode($request->code)) {
+            $token = $user->createToken('auth_token')->plainTextToken;
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Email verified successfully',
+                'data' => [
+                    'user' => $user,
+                    'token' => $token,
+                ],
             ]);
         }
 

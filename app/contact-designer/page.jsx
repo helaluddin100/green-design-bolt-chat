@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Send, User, Mail, MessageCircle, Star, Award, Calendar } from 'lucide-react'
+import ProtectedRoute from '../components/ProtectedRoute'
 import MiniHeader from '../components/MiniHeader'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
@@ -79,6 +80,7 @@ export default function ContactDesigner() {
   }
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-gray-50">
       <MiniHeader />
       <Header />
@@ -254,5 +256,6 @@ export default function ContactDesigner() {
 
       <Footer />
     </div>
+    </ProtectedRoute>
   )
 }

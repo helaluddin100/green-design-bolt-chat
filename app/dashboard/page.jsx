@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { User, Download, CreditCard, Settings, LogOut, FileText, Calendar, DollarSign, Upload, Eye, Trash2, Edit } from 'lucide-react'
+import ProtectedRoute from '../components/ProtectedRoute'
 import MiniHeader from '../components/MiniHeader'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
@@ -75,6 +76,7 @@ export default function Dashboard() {
   ]
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <MiniHeader />
       <Header />
@@ -404,5 +406,6 @@ export default function Dashboard() {
 
       <Footer />
     </div>
+    </ProtectedRoute>
   )
 }

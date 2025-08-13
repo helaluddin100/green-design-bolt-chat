@@ -16,6 +16,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [needsVerification, setNeedsVerification] = useState(false)
 
   useEffect(() => {
     checkAuth()
@@ -39,11 +40,16 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const response = await authAPI.login(credentials)
-      const { user, token } = response.data.data
+      const { user, token, verification_required } = response.data.data
       
-      localStorage.setItem('auth_token', token)
-      localStorage.setItem('user', JSON.stringify(user))
-      setUser(user)
+      if (verification_required) {
+        setNeedsVerification(true)
+        return { success: true, needsVerification: true }
+      } else {
+        localStorage.setItem('auth_token', token)
+        localStorage.setItem('user', JSON.stringify(user))
+        setUser(user)
+      }
       
       toast.success('Login successful!')
       return { success: true }
@@ -57,11 +63,17 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData)
-      const { user, token } = response.data.data
+      const { user, token, verification_required } = response.data.data
       
-      localStorage.setItem('auth_token', token)
-      localStorage.setItem('user', JSON.stringify(user))
-      setUser(user)
+      if (verification_required) {
+        setNeedsVerification(true)
+        // Don't set user or token until verified
+        return { success: true, needsVerification: true, email: user.email }
+      } else {
+        localStorage.setItem('auth_token', token)
+        localStorage.setItem('user', JSON.stringify(user))
+        setUser(user)
+      }
       
       toast.success('Registration successful!')
       return { success: true }
@@ -88,6 +100,8 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
+    needsVerification,
+    setNeedsVerification,
     login,
     register,
     logout,

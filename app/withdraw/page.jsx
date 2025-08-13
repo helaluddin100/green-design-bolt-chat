@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, DollarSign, CreditCard, Building, AlertCircle, CheckCircle } from 'lucide-react'
+import ProtectedRoute from '../components/ProtectedRoute'
 import MiniHeader from '../components/MiniHeader'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
@@ -55,6 +56,7 @@ export default function Withdraw() {
   }
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-gray-50">
       <MiniHeader />
       <Header />
@@ -300,5 +302,6 @@ export default function Withdraw() {
 
       <Footer />
     </div>
+    </ProtectedRoute>
   )
 }

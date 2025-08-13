@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, Leaf, Mail, Lock, User, Phone, Briefcase, Home } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
@@ -24,6 +25,7 @@ export default function Register() {
   })
   
   const { register } = useAuth()
+  const router = useRouter()
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -33,7 +35,7 @@ export default function Register() {
       return
     }
     
-    register({
+    const result = await register({
       first_name: formData.firstName,
       last_name: formData.lastName,
       username: formData.username,
@@ -43,6 +45,12 @@ export default function Register() {
       password_confirmation: formData.confirmPassword,
       user_type: formData.userType
     })
+    
+    if (result.success && result.needsVerification) {
+      router.push(`/verify-email?email=${encodeURIComponent(result.email)}`)
+    } else if (result.success) {
+      router.push('/dashboard')
+    }
   }
 
   const handleChange = (e) => {
